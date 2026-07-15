@@ -1,0 +1,37 @@
+{:itonami.blueprint/id "cloud-itonami-isic-2592"
+ :itonami.blueprint/name "Treatment and coating of metals; machining"
+ :itonami.blueprint/isic-rev5 "2592"
+ :itonami.blueprint/domain :metal-treatment-coating-machining/manufacturing
+ :itonami.blueprint/license "AGPL-3.0-or-later"
+ :itonami.blueprint/social-impact [:worker-safety :materials-safety :resource-efficiency]
+ :itonami.blueprint/governor :metal-treatment-coating-machining-plant-operations-governor
+ :itonami.blueprint/robotics true
+ :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger :cae]
+ :itonami.blueprint/status :public-oss
+ :itonami.blueprint/maturity :implemented
+ :itonami.blueprint/implemented-slice
+ "MetalTreatmentAdvisor ⊣ Metal Treatment, Coating & Machining Plant
+ Operations Governor, langgraph-clj StateGraph, append-only audit
+ ledger. A plant OPERATIONS COORDINATION actor for a metal-treatment/
+ coating/machining job shop (electroplating -> anodizing ->
+ heat-treatment -> CNC machining production line) producing
+ electroplated, anodized, powder-coated, galvanized, heat-treated and
+ precision-machined parts -- not direct plating/machining-line-
+ equipment control authority. Four ops (`:log-production-batch` /
+ `:schedule-maintenance` / `:flag-safety-concern` /
+ `:coordinate-shipment`), all `:effect :propose` only. Ten concrete
+ governor checks elaborate this blueprint's four HARD invariants:
+ propose-only effect, closed op allowlist, closed proposal-effect
+ allowlist (no direct plating/machining-line-equipment control),
+ permanent plating/machining-line-actuate block, independent equipment
+ verification/registration before maintenance scheduling, independent
+ batch verification/registration before shipment coordination,
+ independent shipment-weight recompute against the batch's own logged
+ weight, double-schedule guard, product-category validation, and
+ defect-rate plausibility validation. Safety-concern flagging
+ (electroplating-bath chemical-toxicity exposure -- cyanide/hexavalent-
+ chromium/acid baths, CNC-machining swarf/cutting-tool laceration
+ hazard, heat-treatment-furnace burn/radiant-heat exposure)
+ ALWAYS escalates to a human shop supervisor; `:log-production-batch`
+ is the only op eligible to auto-commit, and only at phase 3 when
+ governor-clean."}
