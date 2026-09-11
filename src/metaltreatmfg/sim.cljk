@@ -1,5 +1,5 @@
 (ns metaltreatmfg.sim
-  "Demo driver -- `clojure -M:dev:run`. Walks a clean metal-treatment/
+  "Demo driver -- `kbb -M:dev:run`. Walks a clean metal-treatment/
   coating/machining job shop through intake -> maintenance scheduling
   (escalate/approve) -> safety-concern flag (escalate/approve) ->
   shipment coordination (escalate/approve), then shows HARD-hold
