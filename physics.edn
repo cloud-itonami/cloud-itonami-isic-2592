@@ -1,0 +1,45 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:dev:physics` runs it.
+;;
+;; The README has no "Robotics premise" section; its Scope names the job
+;; shop this actor coordinates (ISIC 2592): electroplating, anodizing,
+;; powder coating, galvanizing, heat treatment and precision machining of
+;; other manufacturers' parts. The physical work of that shop taken here:
+;; bringing a powder-coated part up to cure temperature in the oven,
+;; oil-quenching a heat-treated part, and the hoist arm lifting a loaded
+;; plating rack out of the bath.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isic-2592"
+ :cases
+ [{:id :powder-cure-heat-up
+   :kind :thermal
+   :procedure "powder-coated steel part in the 200 C convection cure oven, heated from both faces (half the section, mid-plane adiabatic): time for a 6 mm part (half section 3 mm) to reach the 180 C cure temperature; sweep = oven air heat-transfer coefficient (fan setting)"
+   :params {:thickness-m 0.003 :conductivity-w-mk 45.0 :density-kg-m3 7850.0 :specific-heat-j-kgk 480.0
+            :t0-c 20.0 :t-hot-c 200.0 :h-front-w-m2k 30.0 :h-back-w-m2k 0.0
+            :threshold-c 180.0 :duration-s 3600.0 :nodes 3}
+   :sweep {:param :h-front-w-m2k :values [10.0 15.0 25.0 40.0 60.0]}
+   :quantity :time-to-threshold-s
+   :limit {:max 900.0 :basis "estimate: 15 minutes of the conveyor's oven time allowed for heat-up, leaving the rest for the cure hold"}
+   :boundary {:lo 5.0 :hi 120.0}}
+  {:id :oil-quench
+   :kind :thermal
+   :procedure "austenitised steel part (850 C) plunged in 60 C quench oil, quenched from both faces (half the section, core adiabatic): time for the core to fall below 300 C before the part is lifted out; sweep = half section"
+   :params {:thickness-m 0.02 :conductivity-w-mk 30.0 :density-kg-m3 7850.0 :specific-heat-j-kgk 600.0
+            :t0-c 850.0 :t-hot-c 60.0 :h-front-w-m2k 800.0 :h-back-w-m2k 0.0
+            :threshold-c 300.0 :threshold-direction :falling :duration-s 900.0 :nodes 6}
+   :sweep {:param :thickness-m :values [0.008 0.012 0.02 0.03 0.05]}
+   :quantity :time-to-threshold-s
+   :limit {:max 300.0 :basis "estimate: the load stays 5 minutes in the quench tank before the hoist moves it on; a constant oil heat-transfer coefficient stands in for the vapour/boiling/convection stages"}
+   :boundary {:lo 0.006 :hi 0.08}}
+  {:id :plating-rack-lift
+   :kind :manipulator
+   :procedure "hoist arm lifts a loaded plating rack out of the nickel bath and swings it over the rinse tank"
+   :params {:l1-m 0.80 :l2-m 0.70 :m1-kg 18.0 :m2-kg 12.0
+            :from [0.90 -0.40] :to [0.50 0.40] :duration-s 4.0 :steps 500}
+   :sweep {:param :payload-kg :values [10.0 20.0 30.0 45.0 60.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 800.0 :basis "estimate: continuous shoulder torque of a ~60 kg-payload industrial arm class"}
+   :boundary {:lo 1.0 :hi 150.0}}]}
